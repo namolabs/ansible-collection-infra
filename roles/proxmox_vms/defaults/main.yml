@@ -1,0 +1,43 @@
+---
+# defaults file for infra_proxmox_create_demo_vm
+
+# API
+api_host: "pve02"
+api_user: "{{ proxmox_api_user }}"
+api_token_id: "{{ proxmox_token_id }}"
+api_token_secret: "{{ proxmox_api_token }}"
+# Node where the VM shall be started
+proxmox_node: "pve02"
+
+# Name of the Debian Clone Template
+clone_name: "ubuntu-cloud-22-04"
+
+# For cloud-init
+domain_name: infra.namolabs.de
+timezone: "Europe/Berlin"
+locale: "en_US.UTF-8"
+
+# Snippet-Storage
+snippets_path: "/mnt/pve/pvedata/snippets/"
+snippets_storage: "pvedata"
+
+# VM-Storage
+vm_storage: "tank"
+
+# Vars for the VM itself DemoVM
+vm_name: "demoVM02"
+vm_memory: 3060
+vm_cores: 4
+vm_disk_size: "62G"
+vm_disk_type: "scsi0"
+cloudinit_user: "demo"
+ansible_cloudinit_user: "ansible"
+ansible_ssh_authorized_keys: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+ssh_authorized_keys: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+vm_bridge: "vmbr0"
+# vlan 1 is the default vlan, but setting it to 1 results in client not getting an IP
+# Modified role to use tag_snippet, this will be added verbatim to the net0 config
+# e.g. to set vland_id to 2, set tag_snippet to "tag=2," (including comma at the end)
+# tag_snippet: "tag=2,"
+tag_snippet: ""
+fw_enabled: 0

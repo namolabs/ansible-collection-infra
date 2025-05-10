@@ -1,0 +1,11 @@
+- name: Delete cloudinit user data file on controller
+  ansible.builtin.file:
+    path: "{{ configfolder }}/{{ vm_item.name }}-user-data.yml"
+    state: absent
+  delegate_to: localhost
+
+- name: Delete cloudinit network data file
+  ansible.builtin.file:
+    path: "{{ configfolder }}/{{ vm_item.name }}-network-data.yml"
+    state: absent
+  delegate_to: localhost

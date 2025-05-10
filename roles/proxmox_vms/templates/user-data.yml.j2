@@ -1,0 +1,42 @@
+#cloud-config
+
+hostname: {{ vm_name }}
+timezone: {{ timezone }}
+
+user: {{ cloudinit_user }}
+
+manage_etc_hosts: localhost
+fqdn: {{ vm_name }}.{{ domain_name }}
+
+ssh_authorized_keys:
+  - {{ ssh_authorized_keys}}
+
+chpasswd:
+  expire: false
+users:
+  - default
+  - name: {{ ansible_cloudinit_user }}
+    lock_passwd: false
+    hashed-passwd: "{{ ansible_hashed_password }}"
+    ssh_authorized_keys:
+      - {{ ansible_ssh_authorized_keys }}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: users,adm,dialout,cdrom,floppy,tape,sudo,audio,dip,video,plugdev,netdev
+    shell: /bin/bash
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - needrestart
+  - qemu-guest-agent
+
+runcmd:
+  - timedatectl set-ntp true
+  - locale-gen {{ locale }}
+  - localectl set-locale LANG={{ locale }}
+  - systemctl enable qemu-guest-agent
+  - systemctl start qemu-guest-agent
+
+power_state:
+  mode: reboot

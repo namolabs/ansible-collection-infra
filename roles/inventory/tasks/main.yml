@@ -1,0 +1,5 @@
+---
+# tasks file for inventory
+- name: loop over all vms included in config
+  include_tasks: "inventory_{{ (project_state | lower) | default('create') }}.yml"
+

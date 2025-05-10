@@ -1,8 +1,8 @@
 
-- name: read cluster config {{ configfolder }}/cluster.json
+- name: read project config {{ configfolder }}/project.json
   include_vars:
     dir: "{{ configfolder }}"
-    files_matching: 'cluster'
+    files_matching: 'project'
     ignore_unknown_extensions: True
     extensions:
     - "json"
@@ -12,18 +12,13 @@
   debug:
     msg: "included: {{ item }}"
   loop: "{{ result.ansible_included_var_files }}"
-
-- name: Set switchname
-  set_fact:
-    cluster_switchname: "{{ fetchdata.hostconfig.external_switchname }}"
-
-- name: Set jmesquery string for extracting nic data connected to cluster switch {{ cluster_switchname }}
-  set_fact:
-    jmesquerystring: "vms[*].{name: name, role: role, nic: nic[?switch==`{{ cluster_switchname }}`]}"
-
-- name: Extract nic data for "external" switch {{ cluster_switchname }}
-  set_fact:
-    nicdata: "{{ fetchdata  | json_query(jmesquerystring) | flatten(1) }}"
   delegate_to: localhost
 
+# {{ docker_config | to_yaml(indent=4) }}
+
+- name: Debug - yaml of network config
+  debug:
+    msg: "{{ item.network | to_yaml }}"
+  loop: "{{ projectdata.vms }}"
+  delegate_to: localhost
 

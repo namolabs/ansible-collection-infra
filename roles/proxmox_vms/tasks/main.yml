@@ -1,0 +1,17 @@
+---
+# tasks file for proxmox_create_vm
+- name: loop over all vms included in config
+  vars:
+    proxmox_node: "{{ vm_item.node }}"
+    clone_name: "{{ vm_item.cloneimage }}"
+    vm_name: "{{ vm_item.name }}"
+    vm_storage: "{{ vm_item.storage }}"
+    vm_cores: "{{ vm_item.cores |default(2) }}"
+    vm_memory: "{{ vm_item.memory  | default(2048) }}"
+    vm_id: "{{ vm_item.id |default(0) }}"
+    vm_macaddress: "{{ vm_item.network.ethernets.id0.match.macaddress }}"
+  include_tasks: "proxmox_{{ (project_state | lower) | default('create') }}_vm.yml"
+  loop: "{{ projectdata.vms | list}}"
+  loop_control:
+    loop_var: vm_item
+

@@ -1,0 +1,20 @@
+---
+# roles/proxmox_prepare/tasks/main.yaml
+# Prepare the Proxmox hosts
+
+#- name: Ensure pip is installed
+#  ansible.builtin.apt:
+#    name: python3-proxmoxer
+#    state: present
+#  become: yes
+
+  - name: update repository cache
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+
+  - name: install proxmoxer
+    apt:
+      name:
+      - python3-proxmoxer
+      state: latest

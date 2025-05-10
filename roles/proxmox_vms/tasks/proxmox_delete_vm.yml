@@ -1,0 +1,21 @@
+- name: Delete vm {{ vm_item.name }} from proxmox
+  community.general.proxmox_kvm:
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
+    api_token_id: "{{ api_token_id }}"
+    api_token_secret: "{{ api_token_secret }}"
+    node: "{{ proxmox_node }}"
+    name: "{{ vm_item.name }}"
+    force: true
+    state: absent
+  register: state
+
+- name: Delete Cloudinit user-data file from proxmox node
+  ansible.builtin.file:
+    path: "{{ snippets_path }}/{{ vm_name }}-user-data.yml"
+    state: absent
+
+- name: Delete Cloudinit network-data file from proxmox node
+  ansible.builtin.file:
+    path: "{{ snippets_path }}/{{ vm_name }}-network-data.yml"
+    state: absent

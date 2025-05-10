@@ -1,0 +1,44 @@
+- name: set local variables - combine cloudinit_defaults.users with vm_item.users
+  set_fact:
+    cloudinit_users: "{{ (cloudinit_defaults.users | list)  + (vm_item.users | list) }}"
+    #cloudinit: "{{ cloudinit_defaults | combine(cloudinit_users) }}"
+
+- name: set derived variables - combine cloudinit_defaults with vm_item
+  set_fact:
+    cloudinit: "{{ cloudinit_defaults | combine({'users': cloudinit_users})  }}"
+
+- name: set derived variables - set fqdn to vm_item.fqdn, if not defined in user provided data
+  set_fact:
+    cloudinit: "{{ cloudinit | combine({'fqdn': (vm_item.fqdn | default(vm_item.name + '.' + vm_item.domain)) }) }}"
+#  when: vm_item.fqdn is defined
+
+- name: set derived variables - set hostname to vm_item.name
+  set_fact:
+    cloudinit: "{{ cloudinit | combine({'hostname': vm_item.name })  }}"
+
+# - name: Debug - show cloudinit_defaults combined with users
+#   debug:
+#     msg: "{{ cloudinit_defaults | combine({'users': cloudinit_users}) }}"
+#   delegate_to: localhost
+
+# - name: Debug - Create yaml file of combined data
+#   copy:
+#     content: "{{ cloudinit | to_yaml }}"
+#     dest: "{{ configfolder }}/{{ vm_item.name }}.yml"
+#   delegate_to: localhost
+
+- name: Create cloudinit user data file based on template
+  template:
+    src: cloudinit.yml.j2
+    dest: "{{ configfolder }}/{{ vm_item.name }}-user-data.yml"
+  delegate_to: localhost
+
+- name: Set cloudinit to network data
+  set_fact:
+    cloudinit: "{{ {} | combine({'network': vm_item.network })  }}"
+
+- name: Create cloudinit network data file based on template
+  template:
+    src: cloudinit.yml.j2
+    dest: "{{ configfolder }}/{{ vm_item.name }}-network-data.yml"
+  delegate_to: localhost

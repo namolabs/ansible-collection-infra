@@ -1,0 +1,6 @@
+- name: "Delete inventory file {{ configfolder }}/{{ projectid }}-inventory.ini"
+  ansible.builtin.file:
+    path: "{{ configfolder }}/{{ projectid }}-inventory.ini"
+    state: absent
+  delegate_to: localhost
+  run_once: true

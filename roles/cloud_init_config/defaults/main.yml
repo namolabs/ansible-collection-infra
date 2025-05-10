@@ -1,0 +1,39 @@
+locale: "en_US.UTF-8"
+
+cloudinit_defaults:
+  hostname: "defaulthostname"
+  timezone: "Europe/Berlin"
+
+  manage_etc_hosts: localhost
+  fqdn: "default.example.com"
+
+  chpasswd:
+    expire: false
+
+  users:
+    - default
+    - name: ansible
+      lock_passwd: false
+      hashed_passwd: "{{ ansible_hashed_password }}"
+      ssh_authorized_keys:
+        - "{{ ansible_ssh_authorized_key }}"
+      sudo: ['ALL=(ALL) NOPASSWD:ALL']
+      groups: users,adm,dialout,cdrom,floppy,tape,sudo,audio,dip,video,plugdev,netdev
+      shell: /bin/bash
+
+  package_update: true
+  package_upgrade: true
+
+  packages:
+    - needrestart
+    - qemu-guest-agent
+
+  runcmd:
+    - timedatectl set-ntp true
+    - "locale-gen {{ locale }}"
+    - "localectl set-locale LANG={{ locale }}"
+    - systemctl enable qemu-guest-agent
+    - systemctl start qemu-guest-agent
+
+  power_state:
+    mode: reboot

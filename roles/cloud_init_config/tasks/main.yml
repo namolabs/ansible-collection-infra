@@ -1,0 +1,8 @@
+---
+# tasks file for generate_cloud_init
+- name: loop over all vms included in config
+  include_tasks: "{{ (project_state | lower) | default('create') }}_vm_cloudinit_file.yml"
+  loop: "{{ projectdata.vms | list}}"
+  loop_control:
+    loop_var: vm_item
+

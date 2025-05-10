@@ -1,0 +1,6 @@
+- name: Create inventory file
+  ansible.builtin.template:
+    src: inventory.ini.j2
+    dest: "{{ configfolder }}/{{ projectid }}-inventory.ini"
+  delegate_to: localhost
+  run_once: true
