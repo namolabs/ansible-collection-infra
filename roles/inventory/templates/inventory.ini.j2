@@ -1,8 +1,19 @@
-[servers]
-{% for vm in (projectdata.vms | list) %}
-{{ vm.name }} ansible_host={{ vm.network.ethernets.id0.addresses | first | ansible.utils.ipaddr('address') }}
-{% endfor %}
+{%- set role_list=[] %}
+{%- for vm in (projectdata.vms | list) %}
+{%- for r in vm.role %}
+{{ role_list.append(r) }}
+{%- endfor %}
+{%- endfor %}
+{%- for role in role_list |  unique | sort %}
+[{{ role }}]
+{% set iplist = projectdata.vms | community.general.json_query("[?contains(role, `%s`)].network.ethernets.vmbr0.addresses[0]" % (role)) | ansible.utils.ipaddr('address')%}
+{%- for ip in iplist %}
+{%- set vmname = projectdata.vms | community.general.json_query("[?contains(network.ethernets.vmbr0.addresses[0],`%s`)].name" % (ip))| first %}
+{{ vmname}} ansible_host={{ ip }}
+{% endfor %}{{'\n'}}
+{%- endfor %}
 
 [all:vars]
 ansible_private_key_file=/home/ansible/.ssh/id_rsa
 ansible_python_interpreter=/usr/bin/python3
+

@@ -8,7 +8,7 @@
     api_token_secret: "{{ api_token_secret }}"
     node: "{{ proxmox_node }}"
     clone: "{{ clone_name }}"
-    newid: "{{ vm_id  }}"  # Control to the given ID
+    newid: "{{ vm_id  }}" # Control to the given ID
     name: "{{ vm_name }}"
     full: true
     storage: "{{ vm_storage }}"
@@ -40,9 +40,19 @@
     mode: "0644"
   when: state.changed
 
-- name: Debug- show vm_macaddress
+- name: generate network dictionary for proxmox_kvm
+  ansible.builtin.set_fact:
+    netdict: "{{ netdict | combine({'net' + ansible_loop.index0 | string:  'virtio=' + item.value.match.macaddress | string + ',bridge=' + item.key | string + ',firewall=0'} )  }}"
+  loop: "{{ lookup('dict', vm_item.network.ethernets) }}"
+  loop_control:
+    extended: true
+  vars:
+    netdict: {}
+#      projectdata: "{{ lookup('file', configfolder + '/projectdata.json') | from_json }}"
+
+- name: Debug- show network dictionary
   debug:
-    msg: "VM MAC Address: {{ vm_macaddress }}"
+    msg: "VM Network Dictionary: {{ netdict }}"
   when: state.changed
 
 - name: Modify the Cloned VM, adapt a few parameters, attach cloudinit template
@@ -56,8 +66,8 @@
     name: "{{ vm_name }}"
     cores: "{{ vm_cores | default(2) }}"
     memory: "{{ vm_memory | default(2048) }}"
-    net:
-      net0: "virtio={{ vm_macaddress }},bridge={{ vm_bridge }},{{ tag_snippet }}firewall={{ fw_enabled }}"
+    net: "{{ netdict }}"
+    #      net0: "virtio={{ vm_macaddress }},bridge={{ vm_bridge }},{{ tag_snippet }}firewall={{ fw_enabled }}"
     serial:
       serial0: "socket"
     vga: serial0
